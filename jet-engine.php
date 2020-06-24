@@ -47,6 +47,6 @@ add_action('plugins_loaded', 'iwp_jet_engine_setup', 9);
 function iwp_jet_engine_notice()
 {
     echo '<div class="error">';
-    echo '<p><strong>ImportWP - Jet Engine Importer Addon</strong> requires that you have <strong>ImportWP PRO v2.0.23 or newer</strong>, and <strong>Pods</strong> installed.</p>';
+    echo '<p><strong>ImportWP - Jet Engine Importer Addon</strong> requires that you have <strong>ImportWP PRO v2.0.23 or newer</strong>, and <strong>Jet Engine</strong> installed.</p>';
     echo '</div>';
 }
