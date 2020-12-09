@@ -125,14 +125,27 @@ class JetEngine
             return $result;
         }
 
+        $field_key = $this->get_custom_field_key($key);
+
+        $delimiter = apply_filters('iwp/value_delimiter', ',');
+        $delimiter = apply_filters('iwp/jet_engine/value_delimiter', $delimiter);
+        $delimiter = apply_filters('iwp/jet_engine/' . trim($field_key) . '/value_delimiter', $delimiter);
+
         $field_type = $matches[1];
-        if ($field_type === 'gallery' || $field_type === 'media') {
-            $custom_field_record[$prefix . '_return'] = 'id';
-            $value = $this->custom_fields->processAttachmentField($value, $post_id, $custom_field_record, $prefix);
+
+        switch ($field_type) {
+            case 'gallery':
+            case 'media':
+                $custom_field_record[$prefix . '_return'] = 'id';
+                $value = $this->custom_fields->processAttachmentField($value, $post_id, $custom_field_record, $prefix);
+                break;
+            case 'posts':
+                $value = serialize(array_filter(array_map('trim', explode($delimiter, $value))));
+                break;
         }
 
-        $field_key = $this->get_custom_field_key($key);
-        $result[$field_key] = $value;
+
+        $result[$field_key] = apply_filters('iwp/jet_engine/value', $value, $field_key);
 
         return $result;
     }
