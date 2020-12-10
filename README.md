@@ -1,6 +1,6 @@
 # ImportWP Jet Engine Importer
 
-**Version: 2.0.2**
+**Version: 2.0.3**
 
 ![Jet Engine Importer Importer](./assets/iwp-addon-jet-engine.png)
 
