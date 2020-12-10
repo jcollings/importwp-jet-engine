@@ -28,6 +28,34 @@ class JetEngine
         $this->custom_fields = $custom_fields;
     }
 
+    public function get_jet_engine_relations($post_type)
+    {
+        $options = [];
+        $jet_engine_relations = get_option('jet_engine_relations');
+        if ($jet_engine_relations) {
+            foreach ($jet_engine_relations as $relation) {
+
+                if ($relation['post_type_1'] != $post_type && $relation['post_type_2'] != $post_type) {
+                    continue;
+                }
+
+                if ($relation['type'] !== 'many_to_many') {
+                    continue;
+                }
+
+                $relation_hash = 'relation_' . md5($relation['post_type_1'] . $relation['post_type_2']);
+
+                $type = 'text';
+                $options[] = [
+                    'value' => 'jet_engine_field::' . $type . '::relation_' . $relation['type'] . '-' . $relation_hash,
+                    'label' => 'Jet Engine - Relation - ' . $relation['name'],
+                ];
+            }
+        }
+
+        return $options;
+    }
+
     public function get_jet_engine_fields($section, $section_type = 'post')
     {
         $options = [];
@@ -107,6 +135,7 @@ class JetEngine
             default:
                 $post_type = $importer_model->getSetting('post_type');
                 $fields = array_merge($fields, $this->get_jet_engine_fields($post_type, 'post'));
+                $fields = array_merge($fields, $this->get_jet_engine_relations($post_type));
                 break;
         }
 
@@ -141,6 +170,41 @@ class JetEngine
                 break;
             case 'posts':
                 $value = serialize(array_filter(array_map('trim', explode($delimiter, $value))));
+                break;
+            case 'relation_many_to_many':
+
+                // need to pass object ids.
+
+                $value = array_filter(array_map('trim', explode($delimiter, $value)));
+
+                // remove existing and clear other end
+                $current_meta = get_post_meta($post_id, $field_key);
+                if (!empty($current_meta)) {
+                    foreach ($current_meta as $current_m) {
+                        if (!in_array($current_m, $value)) {
+                            delete_post_meta($current_m, $field_key, $post_id);
+                        }
+                    }
+                }
+
+                // update other end of relationshup
+                if (!empty($value)) {
+                    foreach ($value as $v) {
+
+                        $meta = get_post_meta($v, $field_key);
+                        $found = false;
+                        foreach ($meta as $m) {
+                            if ($m == $post_id) {
+                                $found = true;
+                            }
+                        }
+
+                        if (!$found) {
+                            add_post_meta($v, $field_key, $post_id);
+                        }
+                    }
+                }
+
                 break;
         }
 
