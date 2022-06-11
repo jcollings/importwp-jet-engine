@@ -1,6 +1,9 @@
 # Import WP Jet Engine Importer
 
-**Version: 2.0.4**
+Requires Import WP: 2.5.0
+Requires Import WP PRO: 2.5.0
+
+**Version: 2.1.0**
 
 ![Jet Engine Importer Importer](./assets/iwp-addon-jet-engine.png)
 

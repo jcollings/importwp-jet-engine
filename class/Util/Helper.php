@@ -34,7 +34,7 @@ class Helper
         $meta_boxes = [];
 
         // Check options field: jet_engine_meta_boxes
-        $meta_boxes_options = get_option('jet_engine_meta_boxes');
+        $meta_boxes_options = get_option('jet_engine_meta_boxes', []);
         foreach ($meta_boxes_options as $meta_box_id => $meta_box_settings) {
             if (!isset($meta_box_settings['args'], $meta_box_settings['args']['object_type']) || $meta_box_settings['args']['object_type'] !== $section_type || empty($meta_box_settings['meta_fields'])) {
                 continue;
