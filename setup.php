@@ -202,42 +202,49 @@ function iwp_jet_engine_process_field($api, $post_id, $field, $value)
             if ($post_id) {
                 $value = $api->processAttachmentField($value, $post_id, ['_return' => 'id-raw']);
             }
-            if (isset($field['data'], $field['data']['value_format'])) {
-                // id, url, both
-                switch ($field['data']['value_format']) {
-                    case 'url':
-                        $value = array_reduce($value, function ($carry, $item) {
-                            $carry[] = wp_get_attachment_url($item);
-                            return $carry;
-                        }, []);
-                        $value = implode(',', $value);
-                        break;
-                    case 'both':
-                        $value = array_reduce($value, function ($carry, $item) {
-                            $carry[] = ['url' => wp_get_attachment_url($item), 'id' => $item];
-                            return $carry;
-                        }, []);
 
-                        $value = $field_type == 'media' && !empty($value) ? $value[0] : $value;
-                        break;
-                    default:
-                        $value = implode(',', $value);
-                        break;
-                }
+            $field_format = isset($field['data'], $field['data']['value_format']) ? $field['data']['value_format'] : null;
+
+            // id, url, both
+            switch ($field_format) {
+                case 'url':
+                    $value = array_reduce($value, function ($carry, $item) {
+                        $carry[] = wp_get_attachment_url($item);
+                        return $carry;
+                    }, []);
+                    $value = implode(',', $value);
+                    break;
+                case 'both':
+                    $value = array_reduce($value, function ($carry, $item) {
+                        $carry[] = ['url' => wp_get_attachment_url($item), 'id' => $item];
+                        return $carry;
+                    }, []);
+
+                    $value = $field_type == 'media' && !empty($value) ? $value[0] : $value;
+                    break;
+                default:
+                    $value = implode(',', $value);
+                    break;
             }
             break;
         case 'posts':
-            $value = serialize(array_filter(array_map('trim', explode($delimiter, $value))));
+            $value = array_filter(array_map('trim', explode($delimiter, $value)));
             break;
         case 'date':
-            $value = date('Y-m-d', strtotime($value));
+            if (!empty($value)) {
+                $value = date('Y-m-d', strtotime($value));
+            }
             break;
         case 'time':
-            $value = date('H:i', strtotime($value));
+            if (!empty($value)) {
+                $value = date('H:i', strtotime($value));
+            }
             break;
         case 'datetime':
         case 'datetime-local':
-            $value = date('Y-m-d\TH:i', strtotime($value));
+            if (!empty($value)) {
+                $value = date('Y-m-d\TH:i', strtotime($value));
+            }
             break;
             // TODO: Process: relation_one_to_one
         case 'relation_many_to_one':

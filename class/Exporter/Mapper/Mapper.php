@@ -7,6 +7,11 @@ use ImportWPAddon\JetEngine\Util\Helper;
 class Mapper
 {
     /**
+     * @var \ImportWP\EventHandler
+     */
+    protected $event_handler;
+
+    /**
      * @var string
      */
     protected $jet_engine_type;
@@ -18,57 +23,147 @@ class Mapper
     {
         $this->event_handler = $event_handler;
 
-        add_filter('iwp/exporter/' . $filter_type . '/custom_field_list', [$this, 'get_fields'], 10, 2);
-        add_filter('iwp/exporter/' . $filter_type . '/value', [$this, 'save_fields'], 10, 4);
+        add_filter('iwp/exporter/' . $filter_type . '/fields', [$this, 'modify_fields'], 10, 2);
+        add_filter('iwp/exporter/' . $filter_type . '/setup_data', [$this, 'load_data'], 10, 2);
     }
 
-    function get_fields($custom_fields, $template_args)
+    function process_field_list($fields)
     {
-        $addon_fields = Helper::get_fields($this->jet_engine_type, $template_args);
+        $tmp = [];
 
-        foreach ($addon_fields as $field) {
-            $results = $this->generate_custom_field($field);
-            if (!empty($results)) {
-                $custom_fields = array_merge($custom_fields, $results);
+        foreach ($fields as $field) {
+
+            switch ($field['type']) {
+                case 'gallery':
+                case 'media':
+                    $tmp[] = $field['name'];
+                    $tmp[] = $field['name'] . '::id';
+                    $tmp[] = $field['name'] . '::url';
+                    break;
+                default:
+                    $tmp[] = $field['name'];
+                    break;
             }
         }
 
-        return $custom_fields;
+        return $tmp;
     }
 
-    function save_fields($output, $column, $record, $meta)
+    function modify_fields($fields, $template_args)
     {
-        if (preg_match('/^ewp_jet::(.*?)$/', $column, $matches) == 1) {
-            $parts = explode('::', $matches[1]);
-            $field_id = $parts[0];
-            $field_type = $parts[1];
-            $extra = isset($parts[2]) ? $parts[2] : '';
+        $addon_fields = Helper::get_fields($this->jet_engine_type, $template_args);
 
-            switch ($field_type) {
+        $default_fields = array_filter($addon_fields, function ($item) {
+            return $item['type'] !== 'repeater';
+        });
+
+        foreach ($default_fields as $field) {
+            $fields['children']['custom_fields']['fields'] = array_filter($fields['children']['custom_fields']['fields'], function ($item) use ($field) {
+                return $item !== $field['name'];
+            });
+        }
+
+        $fields['children']['jetengine'] = [
+            'key' => 'jetengine',
+            'label' => 'JetEngine Fields',
+            'loop' => false,
+            'fields' => $this->process_field_list($default_fields),
+            'children' => []
+        ];
+
+        return $fields;
+    }
+
+    function load_field_data($default_fields, $meta)
+    {
+        $output = [];
+
+        foreach ($default_fields as $field) {
+
+            $field_id = $field['name'];
+            switch ($field['type']) {
                 case 'gallery':
-                case 'media':
-                    if (isset($meta[$field_id], $meta[$field_id][0])) {
-                        if ($extra === 'attachment_id') {
-                            $output = explode(',', $meta[$field_id][0]);
-                        } elseif ($extra === 'attachment_url') {
 
-                            $tmp = [];
-                            $images = explode(',', $meta[$field_id][0]);
-                            if (!empty($images)) {
-                                foreach ($images as $image) {
-                                    $img_url =  wp_get_attachment_url($image);
-                                    if ($img_url) {
-                                        $tmp[] = $img_url;
-                                    }
+                    $tmp = [
+                        'id' => [],
+                        'url' => []
+                    ];
+
+                    if (isset($meta[$field_id], $meta[$field_id][0])) {
+
+                        if ($field['value_format'] === 'url') {
+
+                            $parts = explode(',', $meta[$field_id][0]);
+                            foreach ($parts as $part) {
+
+                                $attachment_id = attachment_url_to_postid($part);
+                                $tmp['id'][] = $attachment_id;
+                                $tmp['url'][] = $part;
+                            }
+                        } elseif ($field['value_format'] === 'id') {
+
+                            $parts = explode(',', $meta[$field_id][0]);
+                            foreach ($parts as $part) {
+                                $tmp['id'][] = $part;
+                                $tmp['url'][] = wp_get_attachment_url($part);
+                            }
+                        } elseif ($field['value_format'] === 'both') {
+
+                            $serialized = (array)maybe_unserialize($meta[$field_id][0]);
+                            if (!empty($serialized)) {
+
+                                foreach ($serialized as $part) {
+                                    $tmp['id'][] = $part['id'];
+                                    $tmp['url'][] = $part['url'];
                                 }
                             }
-                            $output = $tmp;
                         }
                     }
+
+                    $output[$field['name']] =  $tmp['id'];
+                    $output[$field['name'] . '::id'] = $tmp['id'];
+                    $output[$field['name'] . '::url'] = $tmp['url'];
+
+                    break;
+                case 'media':
+
+                    $output[$field['name']] = '';
+                    $output[$field['name'] . '::id'] = '';
+                    $output[$field['name'] . '::url'] = '';
+
+                    if (isset($meta[$field_id], $meta[$field_id][0])) {
+
+                        if ($field['value_format'] === 'url') {
+
+                            $attachment_id = attachment_url_to_postid($meta[$field_id][0]);
+                            $output[$field['name']] = $attachment_id;
+                            $output[$field['name'] . '::id'] = $attachment_id;
+                            $output[$field['name'] . '::url'] = $meta[$field_id][0];
+                        } elseif ($field['value_format'] === 'id') {
+
+                            $attachment_id = $meta[$field_id][0];
+                            $output[$field['name']] = $attachment_id;
+                            $output[$field['name'] . '::id'] = $attachment_id;
+                            $output[$field['name'] . '::url'] = wp_get_attachment_url($meta[$field_id][0]);
+                        } elseif ($field['value_format'] === 'both') {
+
+                            $serialized = (array)maybe_unserialize($meta[$field_id][0]);
+                            if (!empty($serialized)) {
+                                $output[$field['name']] = $serialized['id'];
+                                $output[$field['name'] . '::id'] = $serialized['id'];
+                                $output[$field['name'] . '::url'] = $serialized['url'];
+                            }
+                        }
+                    }
+
                     break;
                 default:
-                    if (isset($meta[$field_id])) {
-                        $output = $meta[$field_id];
+                    if (isset($meta[$field_id]) && is_array($meta[$field_id])) {
+                        $output[$field['name']] = $meta[$field_id][0];
+                    } elseif (isset($meta[$field_id])) {
+                        $output[$field['name']] = $meta[$field_id];
+                    } else {
+                        $output[$field['name']] = '';
                     }
                     break;
             }
@@ -77,21 +172,15 @@ class Mapper
         return $output;
     }
 
-    protected function generate_custom_field($field)
+    function load_data($record, $template_args)
     {
-        $custom_fields = [];
+        $addon_fields = Helper::get_fields($this->jet_engine_type, $template_args);
 
-        switch ($field['type']) {
-            case 'gallery':
-            case 'media':
-                $custom_fields[] = 'ewp_jet::' . $field['name'] . '::' . $field['type'] . '::attachment_id';
-                $custom_fields[] = 'ewp_jet::' . $field['name'] . '::' . $field['type'] . '::attachment_url';
-                break;
-            default:
-                $custom_fields[] = 'ewp_jet::' . $field['name'] . '::' . $field['type'];
-                break;
-        }
+        $default_fields = array_filter($addon_fields, function ($item) {
+            return $item['type'] !== 'repeater';
+        });
 
-        return $custom_fields;
+        $record['jetengine'] = $this->load_field_data($default_fields, $record['custom_fields']);
+        return $record;
     }
 }
