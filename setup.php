@@ -200,7 +200,7 @@ function iwp_jet_engine_process_field($api, $post_id, $field, $value)
         case 'gallery':
         case 'media':
             if ($post_id) {
-                $value = $api->processAttachmentField($value, $post_id, ['_return' => 'id-raw']);
+                $value = $api->processAttachmentField($value, $post_id, ['settings._return' => 'id-raw']);
             }
 
             $field_format = isset($field['data'], $field['data']['value_format']) ? $field['data']['value_format'] : null;

@@ -253,7 +253,7 @@ class JetEngine
                 break;
             case 'gallery':
             case 'media':
-                $custom_field_record[$prefix . '_return'] = 'id';
+                $custom_field_record[$prefix . 'settings._return'] = 'id';
                 $value = $this->custom_fields->processAttachmentField($value, $post_id, $custom_field_record, $prefix);
                 break;
             case 'posts':

@@ -3,7 +3,7 @@
 Requires Import WP: 2.5.0
 Requires Import WP PRO: 2.5.0
 
-**Version: 2.2.0**
+**Version: 2.2.1**
 
 ![Jet Engine Importer Importer](./assets/iwp-addon-jet-engine.png)
 

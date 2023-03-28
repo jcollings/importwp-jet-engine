@@ -70,9 +70,23 @@ class CustomContentTypeTemplate extends Template implements TemplateInterface
         $content_type_fields = $content_type_data->get_formatted_fields();
 
         $group_fields = [];
+        $tmp = [];
         foreach ($content_type_fields as $field) {
 
             switch ($field['type']) {
+                case 'repeater':
+
+                    $sub_fields = [];
+                    foreach ($field['repeater-fields'] as $sub_field) {
+                        $sub_fields[] = $template->register_field($sub_field['title'], $sub_field['name']);
+                    }
+
+                    $tmp[] = $template->register_group($field['title'], $field['name'], $sub_fields, [
+                        'type' => 'repeatable',
+                        'row_base' => true
+                    ]);
+
+                    break;
                 case 'gallery':
                 case 'media':
                     $group_fields[] = $template->register_attachment_fields($field['title'], $field['name'], $field['title'] . ' Location', [
@@ -112,6 +126,10 @@ class CustomContentTypeTemplate extends Template implements TemplateInterface
 
         $fields[] = $template->register_group($content_type_data->get_arg('name') . ' Fields', 'content-type', $group_fields);
 
+        if (!empty($tmp)) {
+            $fields = array_merge($fields, $tmp);
+        }
+
         return $fields;
     }
 
@@ -147,6 +165,24 @@ class CustomContentTypeTemplate extends Template implements TemplateInterface
             }
 
             switch ($field['type']) {
+                case 'repeater':
+
+                    $repeater_data = [];
+
+                    $max = intval(isset($fields[$field['name'] . '._index']) ? $fields[$field['name'] . '._index'] : 0);
+                    for ($i = 0; $i < $max; $i++) {
+
+                        $row_key = 'item-' . $i;
+                        $repeater_data[$row_key] = [];
+
+                        foreach ($field['repeater-fields'] as $sub_field) {
+                            $repeater_data[$row_key][$sub_field['name']] = isset($fields[$field['name'] . '.' . $i . '.' . $sub_field['name']]) ? trim($fields[$field['name'] . '.' . $i . '.' . $sub_field['name']]) : '';
+                        }
+                    }
+
+                    $values[$field['name']] = $repeater_data;
+
+                    break;
                 case 'posts':
                     $is_multple = isset($field['is_multiple']) && $field['is_multiple'] === true;
                     $post_types = (array)$field['search_post_type'];
