@@ -15,7 +15,7 @@ Import WP Jet Engine Importer allows you to import into Custom Post Types, Taxon
 
 ## Changelog
 
-### 2.2.1
+### 2.2.2
 
 - FIX - update custom content type image to use new settings prefix.
 - ADD - Allow for imports to run if no unique identifiers are present when insert is the only permission.
