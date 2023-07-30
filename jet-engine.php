@@ -5,7 +5,7 @@
  * Plugin URI: https://www.importwp.com
  * Description: Allow Import WP to import Jet Engine.
  * Author: James Collings <james@jclabs.co.uk>
- * Version: 2.2.1
+ * Version: 2.2.2
  * Author URI: https://www.importwp.com
  * Network: True
  */
