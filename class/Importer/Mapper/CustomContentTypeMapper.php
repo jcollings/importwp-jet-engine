@@ -33,6 +33,12 @@ class CustomContentTypeMapper extends AbstractMapper implements MapperInterface
 
     public function exists(ParsedData $data)
     {
+        // If update permissions are not set then we can import without any unique fields.
+        $update_permission = $this->importer->getPermission('update');
+        $delete_permission = $this->importer->getPermission('delete');
+        if ($update_permission['enabled'] !== true && $delete_permission['enabled'] !== true) {
+            return false;
+        }
 
         $unique_field_args = $this->get_unique_field($data);
         if (empty($unique_field_args)) {
