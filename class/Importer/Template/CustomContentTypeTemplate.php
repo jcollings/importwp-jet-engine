@@ -329,7 +329,11 @@ class CustomContentTypeTemplate extends Template implements TemplateInterface
                     ];
 
                     foreach ($attachment_keys as $k) {
-                        $attachment_data[$k] = $fields[$field_id . '.' . $k];
+                        if (isset($fields[$field_id . '.settings.' . $k])) {
+                            $attachment_data[$k] = $fields[$field_id . '.settings.' . $k];
+                        } elseif (isset($fields[$field_id . '.' . $k])) {
+                            $attachment_data[$k] = $fields[$field_id . '.' . $k];
+                        }
                     }
 
                     $ids = $this->process_attachment(0, $attachment_data, '', $filesystem, $ftp, $attachment);
