@@ -3,7 +3,7 @@
 Requires Import WP: 2.5.0
 Requires Import WP PRO: 2.5.0
 
-**Version: 2.2.2**
+**Version: 2.2.3**
 
 ![Jet Engine Importer Importer](./assets/iwp-addon-jet-engine.png)
 
@@ -14,6 +14,10 @@ Import WP Jet Engine Importer allows you to import into Custom Post Types, Taxon
 **This plugin requires Import WP PRO v2.4.1 or newer**
 
 ## Changelog
+
+### 2.2.3
+
+- FIX - Populate unique field dropdown for custom content types with _ID.
 
 ### 2.2.2
 

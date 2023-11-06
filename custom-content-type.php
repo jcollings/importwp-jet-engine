@@ -74,3 +74,13 @@ function iwp_jet_engine_cct_register_mappers($mappers)
     $mappers['jet-engine-cct'] = CustomContentTypeMapper::class;
     return $mappers;
 }
+
+function iwp_jet_engine_cct_mapper_unique_fields($unique_fields, $mapper_id)
+{
+    if ($mapper_id == 'jet-engine-cct') {
+        return ['_ID'];
+    }
+
+    return $unique_fields;
+}
+add_filter('iwp/mapper/unique_fields', 'iwp_jet_engine_cct_mapper_unique_fields', 10, 2);
