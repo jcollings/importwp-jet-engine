@@ -243,7 +243,12 @@ function iwp_jet_engine_process_field($api, $post_id, $field, $value)
         case 'datetime':
         case 'datetime-local':
             if (!empty($value)) {
-                $value = date('Y-m-d\TH:i', strtotime($value));
+                $is_timestamp = isset($field['data']['is_timestamp']) && $field['data']['is_timestamp'] == true;
+                if ($is_timestamp) {
+                    $value = strtotime($value);
+                } else {
+                    $value = date('Y-m-d\TH:i', strtotime($value));
+                }
             }
             break;
             // TODO: Process: relation_one_to_one
