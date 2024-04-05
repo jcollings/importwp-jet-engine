@@ -270,9 +270,9 @@ class CustomContentTypeTemplate extends Template implements TemplateInterface
                         } else {
 
                             if ($exists) {
-                                $output[$option['key']] = true;
+                                $output[$option['key']] = "true";
                             } else {
-                                $output[$option['key']] = false;
+                                $output[$option['key']] = "false";
                             }
                         }
                     }
@@ -283,7 +283,7 @@ class CustomContentTypeTemplate extends Template implements TemplateInterface
                             if (isset($field['is_array']) && $field['is_array'] === true) {
                                 $output[] = $field_value;
                             } else {
-                                $output[$field_value] = true;
+                                $output[$field_value] = "true";
                             }
                         }
                     }
