@@ -15,6 +15,10 @@ Import WP Jet Engine Importer allows you to import into Custom Post Types, Taxon
 
 ## Changelog
 
+### 2.2.6
+
+- FIX - issue where invalid serialized fields causes importer to error. 
+
 ### 2.2.5
 
 - FIX - Issue saving CCT checkboxes when not saved as array.

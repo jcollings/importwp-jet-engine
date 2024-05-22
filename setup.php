@@ -428,7 +428,12 @@ function iwp_jet_engine_get_fields($section, $section_type = 'post')
 
     if (!empty($rows)) {
         foreach ($rows as $row) {
-            $meta_boxes = array_merge($meta_boxes, unserialize($row['meta_fields']));
+            $meta_fields = unserialize($row['meta_fields']);
+            if (!is_array($meta_fields)) {
+                continue;
+            }
+
+            $meta_boxes = array_merge($meta_boxes, $meta_fields);
         }
     }
 
