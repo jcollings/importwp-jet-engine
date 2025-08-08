@@ -223,7 +223,7 @@ function iwp_jet_engine_process_field($api, $post_id, $field, $value)
                     $value = $field_type == 'media' && !empty($value) ? $value[0] : $value;
                     break;
                 default:
-                    $value = implode(',', $value);
+                    $value = implode(',', (array)$value);
                     break;
             }
             break;
