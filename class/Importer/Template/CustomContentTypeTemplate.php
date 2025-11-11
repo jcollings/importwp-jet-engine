@@ -153,6 +153,14 @@ class CustomContentTypeTemplate extends Template implements TemplateInterface
         $fields = $data->getData();
         $cct_fields = $this->content_type->get_formatted_fields();
 
+        $values = $this->process_fields($fields, $cct_fields);
+
+        $data->replace($values);
+        return $data;
+    }
+
+    public function process_fields($fields, $cct_fields)
+    {
         $values = [];
         foreach ($cct_fields as $field) {
 
@@ -348,7 +356,6 @@ class CustomContentTypeTemplate extends Template implements TemplateInterface
             }
         }
 
-        $data->replace($values);
-        return $data;
+        return $values;
     }
 }

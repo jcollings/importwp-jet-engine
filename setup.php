@@ -223,7 +223,7 @@ function iwp_jet_engine_process_field($api, $post_id, $field, $value)
                     $value = $field_type == 'media' && !empty($value) ? $value[0] : $value;
                     break;
                 default:
-                    $value = implode(',', $value);
+                    $value = implode(',', (array)$value);
                     break;
             }
             break;
@@ -428,7 +428,12 @@ function iwp_jet_engine_get_fields($section, $section_type = 'post')
 
     if (!empty($rows)) {
         foreach ($rows as $row) {
-            $meta_boxes = array_merge($meta_boxes, unserialize($row['meta_fields']));
+            $meta_fields = unserialize($row['meta_fields']);
+            if (!is_array($meta_fields)) {
+                continue;
+            }
+
+            $meta_boxes = array_merge($meta_boxes, $meta_fields);
         }
     }
 

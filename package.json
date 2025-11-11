@@ -1,0 +1,11 @@
+{
+	"devDependencies": {
+		"@wordpress/env": "^9.7.0"
+	},
+	"scripts": {
+		"wp-env": "wp-env",
+		"composer": "wp-env run tests-cli --env-cwd=wp-content/plugins/importwp-jet-engine composer",
+		"phpunit": "wp-env run tests-cli --env-cwd=wp-content/plugins/importwp-jet-engine vendor/bin/phpunit",
+		"wp": "wp-env run cli --env-cwd=wp-content/plugins/importwp-jet-engine wp"
+	}
+}
