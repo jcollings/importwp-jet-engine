@@ -18,6 +18,7 @@ Import WP Jet Engine Importer allows you to import into Custom Post Types, Taxon
 ### 2.2.6
 
 -   FIX - issue where invalid serialized fields causes importer to error.
+-   FIX - Missing delimiter field setting to CCT gallery field settings
 
 ### 2.2.5
 

@@ -333,7 +333,8 @@ class CustomContentTypeTemplate extends Template implements TemplateInterface
                         '_ftp_pass',
                         '_ftp_path',
                         '_local_url',
-                        '_meta._enabled'
+                        '_meta._enabled',
+						'_delimiter'
                     ];
 
                     foreach ($attachment_keys as $k) {
